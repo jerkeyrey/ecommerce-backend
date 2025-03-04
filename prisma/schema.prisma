@@ -7,41 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  BUYER
+  SELLER
+}
+
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
-  role     String @default("buyer") // 'buyer' or 'seller'
+  role     Role     @default(BUYER)
 
   products Product[]
   carts    Cart[]
 }
 
 model Product {
-  id          Int     @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String
   price       Float
   category    String
-  inStock     Boolean @default(true)
+  stock       Int       @default(0)
+  inStock     Boolean   @default(true)
   sellerId    Int
-  seller      User    @relation(fields: [sellerId], references: [id])
+  seller      User      @relation(fields: [sellerId], references: [id])
 
-  CartItem CartItem[]
+  CartItem   CartItem[]
+
+  @@index([sellerId])
 }
-
 model Cart {
   id     Int        @id @default(autoincrement())
   userId Int
   user   User       @relation(fields: [userId], references: [id])
   items  CartItem[]
+
+  @@unique([userId]) 
 }
 
 model CartItem {
   id        Int     @id @default(autoincrement())
   cartId    Int
-  cart      Cart    @relation(fields: [cartId], references: [id])
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId Int
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+
+  @@unique([cartId, productId])
 }
