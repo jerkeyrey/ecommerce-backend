@@ -113,3 +113,67 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const searchProducts = async (req, res) => {
+  try {
+    const { query, category, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+
+    const filters = {
+      AND: [],
+    };
+
+    // Fuzzy search on product name
+    if (query) {
+      filters.AND.push({
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      });
+    }
+
+    // Filter by category
+    if (category) {
+      filters.AND.push({
+        category: {
+          equals: category,
+          mode: "insensitive",
+        },
+      });
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      filters.AND.push({
+        price: {
+          gte: minPrice ? parseFloat(minPrice) : undefined,
+          lte: maxPrice ? parseFloat(maxPrice) : undefined,
+        },
+      });
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
+
+    // Fetch products
+    const products = await prisma.product.findMany({
+      where: filters,
+      skip,
+      take,
+    });
+
+    // Total count for pagination
+    const totalProducts = await prisma.product.count({ where: filters });
+
+    res.json({
+      totalProducts,
+      totalPages: Math.ceil(totalProducts / take),
+      currentPage: parseInt(page),
+      products,
+    });
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
