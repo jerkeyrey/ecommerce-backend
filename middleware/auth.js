@@ -21,9 +21,17 @@ export const authenticateUser = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("✅ Token decoded:", decoded);
 
-    // Ensure 'id' is used (not 'userId')
+    // Check which property contains the user ID (could be id or userId)
+    const userId = decoded.id || decoded.userId;
+
+    if (!userId) {
+      console.log("❌ No user ID found in token:", decoded);
+      return res.status(401).json({ message: "Invalid token format" });
+    }
+
+    // Find user by ID
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id }, // FIXED: Use 'id' instead of 'userId'
+      where: { id: userId },
     });
 
     if (!user) {

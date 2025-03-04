@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -12,12 +12,19 @@ if (!JWT_SECRET) {
 // Sign JWT
 export const generateToken = (user) => {
   try {
+    // Ensure we're using consistent property names (id, not userId)
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      {
+        id: user.id,
+        role: user.role,
+      },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" }
     );
-    console.log("✅ Generated Token:", token);
+    console.log("✅ Generated Token Payload:", {
+      id: user.id,
+      role: user.role,
+    });
     return token;
   } catch (error) {
     console.error("❌ Error generating token:", error.message);
