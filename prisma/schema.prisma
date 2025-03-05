@@ -13,13 +13,24 @@ enum Role {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
   password String
-  role     Role     @default(BUYER)
-  balance Float @default(0.00)
+  role     Role      @default(BUYER)
+  balance  Float     @default(0.00)
   products Product[]
   carts    Cart[]
+  orders   Order[]   // Add this to complete the relation
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  items       Json
+  totalAmount Float
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
 }
 
 model Product {
@@ -56,3 +67,4 @@ model CartItem {
 
   @@unique([cartId, productId])
 }
+
