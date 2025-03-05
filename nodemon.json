@@ -1,0 +1,12 @@
+{
+  "events": {
+    "start": "",
+    "restart": ""
+  },
+  "watch": ["./**/*.js"],
+  "ignore": ["node_modules", ".git"],
+  "delay": "1000",
+  "execMap": {
+    "js": "node"
+  }
+}

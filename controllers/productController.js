@@ -116,7 +116,14 @@ export const deleteProduct = async (req, res) => {
 
 export const searchProducts = async (req, res) => {
   try {
-    const { query, category, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+    const {
+      query,
+      category,
+      minPrice,
+      maxPrice,
+      page = 1,
+      limit = 10,
+    } = req.query;
 
     const filters = {
       AND: [],

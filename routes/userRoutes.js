@@ -1,29 +1,22 @@
 import express from "express";
 import { authenticateUser } from "../middleware/auth.js";
-import { PrismaClient } from "@prisma/client";
+import {
+  getProfile,
+  addFunds,
+  getBalance,
+} from "../controllers/userController.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// Add balance to user
-router.post("/add-balance", authenticateUser, async (req, res) => {
-  try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { id: req.user.id },
-      data: { balance: { increment: amount } },
-    });
-
-    return res.json({ message: "Balance updated", balance: updatedUser.balance });
-  } catch (error) {
-    console.error("❌ Error updating balance:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+// Debug middleware
+router.use((req, res, next) => {
+  console.log("🔍 User Routes - Request:", req.method, req.path);
+  next();
 });
+
+// Protected user routes
+router.get("/profile", authenticateUser, getProfile);
+router.post("/add-funds", authenticateUser, addFunds);
+router.get("/balance", authenticateUser, getBalance);
 
 export default router;
